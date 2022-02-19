@@ -6,12 +6,16 @@ type MessageResponseBody = {
     message: string;
 };
 
-const app = express();
-const apiServer = process.env.API_SERVER;
 const jsonHeader = 'application/json';
+const apiServer = process.env.API_SERVER;
+
+const twilioClient = twilio();
+const twilioSender = process.env.TWILIO_FROM_NUMBER;
+
+const app = express();
 
 const urlEncodedMiddleware = express.urlencoded({ extended: false });
-//const jsonMiddleware = express.json();
+const jsonMiddleware = express.json();
 
 app.post('/call', urlEncodedMiddleware, (_req, res) => {
     const voiceResponse = new twilio.twiml.VoiceResponse();
@@ -51,6 +55,22 @@ app.post('/message', urlEncodedMiddleware, async (req, res) => {
 
     res.writeHead(200, { 'Content-Type': 'text/xml' });
     res.end(messageResponse.toString());
+});
+
+app.post('/send', jsonMiddleware, async (req, res) => {
+    const { message, to } = req.body;
+
+    try {
+        await twilioClient.messages.create({
+            body: message,
+            from: twilioSender,
+            to,
+        });
+
+        res.json({ success: true });
+    } catch {
+        res.json({ success: false });
+    }
 });
 
 export default app;

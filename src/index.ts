@@ -1,5 +1,5 @@
-import app from './app.js';
 import 'dotenv/config';
+import app from './app.js';
 
 /*
   Get port from environment variable or default to 3000
