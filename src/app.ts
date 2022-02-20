@@ -84,7 +84,8 @@ app.post(
             });
 
             res.json({ success: true });
-        } catch {
+        } catch (err) {
+            console.error(err);
             res.json({ success: false });
         }
     }
