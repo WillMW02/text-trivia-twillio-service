@@ -47,7 +47,8 @@ app.post('/message', urlEncodedMiddleware, async (req, res) => {
         const apiMsg = (await apiResponse.json()) as MessageResponseBody;
 
         responseMessage = apiMsg.message;
-    } catch {
+    } catch (err) {
+        console.error(err);
         responseMessage =
             'We are currently experiencing technical difficulties. Sorry for an inconvenience caused! - TextTrivia Team';
     }
