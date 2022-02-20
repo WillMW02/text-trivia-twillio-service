@@ -8,6 +8,7 @@ type MessageResponseBody = {
 
 const jsonHeader = 'application/json';
 const apiServer = process.env.API_SERVER;
+const psk = process.env.HACKY_PSK ?? '';
 
 const twilioClient = twilio();
 const twilioSender = process.env.TWILIO_FROM_NUMBER;
@@ -38,6 +39,7 @@ app.post('/message', urlEncodedMiddleware, async (req, res) => {
             headers: {
                 Accept: jsonHeader,
                 'Content-Type': jsonHeader,
+                psk: psk,
             },
             body: JSON.stringify({ message }),
         });
@@ -57,20 +59,35 @@ app.post('/message', urlEncodedMiddleware, async (req, res) => {
     res.end(messageResponse.toString());
 });
 
-app.post('/send', jsonMiddleware, async (req, res) => {
-    const { message, to } = req.body;
+app.post(
+    '/send',
+    jsonMiddleware,
+    (req, res, next) => {
+        const pskHeader = req.headers.psk;
 
-    try {
-        await twilioClient.messages.create({
-            body: message,
-            from: twilioSender,
-            to,
-        });
+        if (psk != pskHeader) {
+            return res
+                .status(403)
+                .json({ status: 403, message: 'Bad pre-shared key' });
+        }
 
-        res.json({ success: true });
-    } catch {
-        res.json({ success: false });
+        next();
+    },
+    async (req, res) => {
+        const { message, to } = req.body;
+
+        try {
+            await twilioClient.messages.create({
+                body: message,
+                from: twilioSender,
+                to,
+            });
+
+            res.json({ success: true });
+        } catch {
+            res.json({ success: false });
+        }
     }
-});
+);
 
 export default app;
