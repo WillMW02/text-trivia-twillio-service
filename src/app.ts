@@ -31,7 +31,8 @@ app.post('/call', urlEncodedMiddleware, (_req, res) => {
 
 app.post('/message', urlEncodedMiddleware, async (req, res) => {
     const message = (req.body.Body as string) ?? '';
-
+    const number = (req.body.From as string) ?? '';
+    
     let responseMessage: string;
     try {
         const apiResponse = await fetch(`${apiServer}response`, {
@@ -41,7 +42,7 @@ app.post('/message', urlEncodedMiddleware, async (req, res) => {
                 'Content-Type': jsonHeader,
                 psk: psk,
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ response: message , number }),
         });
 
         const apiMsg = (await apiResponse.json()) as MessageResponseBody;
