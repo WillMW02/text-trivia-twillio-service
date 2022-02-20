@@ -30,7 +30,7 @@ app.post('/call', urlEncodedMiddleware, (_req, res) => {
 });
 
 app.post('/message', urlEncodedMiddleware, async (req, res) => {
-    const message = (req.body.Body as string) ?? '';
+    const message = ((req.body.Body as string) ?? '').toLowerCase();
 
     let responseMessage: string;
     try {
